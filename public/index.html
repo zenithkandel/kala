@@ -1,316 +1,134 @@
-<!DOCTYPE html>
-<html lang="ne">
+<!doctype html>
+<html lang="ne" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>कला - Young Artists Platform</title>
-    <meta name="description" content="A platform for young talented artists to showcase and sell their artwork at affordable prices">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/particles.css">
-    <link rel="stylesheet" href="/css/animations.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>कला — Student Art Marketplace</title>
+  <meta name="description" content="कला: a minimal platform where school-level student artists sell beautiful art at affordable prices (NPR 200–1500)." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><rect width='256' height='256' rx='48' fill='black'/><text x='50%' y='56%' text-anchor='middle' font-size='130' fill='white' font-family='Arial'>क</text></svg>">
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-    <!-- Particles Background -->
-    <div id="particles-js"></div>
-    
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <h1>कला</h1>
-                <span>Young Artists Platform</span>
-            </div>
-            
-            <div class="nav-menu" id="nav-menu">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#gallery" class="nav-link">Gallery</a>
-                <a href="#artists" class="nav-link">Artists</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#contact" class="nav-link">Contact</a>
-            </div>
-            
-            <div class="nav-actions">
-                <button class="theme-toggle" id="theme-toggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <a href="/upload" class="btn btn-primary">
-                    <i class="fas fa-upload"></i>
-                    Upload Art
-                </a>
-                <div class="nav-hamburger" id="nav-hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </div>
+  <canvas id="particles"></canvas>
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">क</span>
+      <h1>कला</h1>
+    </div>
+    <nav>
+      <a href="#gallery">Gallery</a>
+      <a href="#how">How it works</a>
+      <a href="#submit">Submit Art</a>
     </nav>
+    <div class="header-actions">
+      <button id="themeToggle" class="chip" aria-label="Switch theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>
+        <span>Theme</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">
-                    <span class="gradient-text">कला</span>
-                    <br>Young Artists Platform
-                </h1>
-                <p class="hero-description">
-                    A platform where unrecognized art talents get a stage to express themselves. 
-                    Support young school-level artists by purchasing their extraordinary artwork at very affordable prices.
-                </p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number" data-target="500">0</span>
-                        <span class="stat-label">Artworks</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number" data-target="150">0</span>
-                        <span class="stat-label">Young Artists</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number" data-target="1200">0</span>
-                        <span class="stat-label">Happy Buyers</span>
-                    </div>
-                </div>
-                <div class="hero-actions">
-                    <a href="#gallery" class="btn btn-primary btn-large">
-                        <i class="fas fa-palette"></i>
-                        Explore Gallery
-                    </a>
-                    <a href="#about" class="btn btn-secondary btn-large">
-                        <i class="fas fa-info-circle"></i>
-                        Learn More
-                    </a>
-                </div>
-            </div>
-            <div class="hero-image">
-                <div class="floating-card">
-                    <img src="/images/hero-art.jpg" alt="Featured Artwork" class="hero-artwork">
-                    <div class="card-info">
-                        <h3>Featured Art</h3>
-                        <p>By Young Artist</p>
-                        <span class="price">NPR 350</span>
-                    </div>
-                </div>
-            </div>
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <h2>Affordable student art for everyone</h2>
+        <p>Unrecognized school-level talents get a platform to shine. Buy original sketches and designs starting at NPR 200.</p>
+        <div class="search-row">
+          <input id="searchInput" type="search" placeholder="Search by title, artist, style…" autocomplete="off" />
+          <select id="categorySelect">
+            <option value="">All Categories</option>
+            <option>Sketch</option>
+            <option>Watercolor</option>
+            <option>Digital</option>
+            <option>Line Art</option>
+          </select>
+          <select id="priceSelect">
+            <option value="">Any Price</option>
+            <option value="300">≤ NPR 300</option>
+            <option value="500">≤ NPR 500</option>
+            <option value="1000">≤ NPR 1000</option>
+            <option value="1500">≤ NPR 1500</option>
+          </select>
         </div>
-        <div class="scroll-indicator">
-            <div class="scroll-arrow"></div>
-        </div>
+      </div>
     </section>
 
-    <!-- Featured Gallery Section -->
-    <section id="gallery" class="gallery-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Featured Artworks</h2>
-                <p class="section-description">Discover amazing artworks by talented young artists</p>
-            </div>
-            
-            <div class="gallery-filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="sketch">Sketches</button>
-                <button class="filter-btn" data-filter="painting">Paintings</button>
-                <button class="filter-btn" data-filter="digital">Digital Art</button>
-                <button class="filter-btn" data-filter="other">Others</button>
-            </div>
-            
-            <div class="gallery-grid" id="gallery-grid">
-                <!-- Artworks will be loaded dynamically -->
-            </div>
-            
-            <div class="gallery-actions">
-                <a href="/gallery" class="btn btn-outline">
-                    <i class="fas fa-eye"></i>
-                    View All Artworks
-                </a>
-            </div>
-        </div>
+    <section id="gallery" class="gallery">
+      <h3 class="section-title">Available Artworks</h3>
+      <div id="grid" class="grid"></div>
+      <div id="emptyState" class="empty" hidden>
+        <p>No artworks match your filters.</p>
+      </div>
     </section>
 
-    <!-- Artists Section -->
-    <section id="artists" class="artists-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Our Young Artists</h2>
-                <p class="section-description">Meet the talented students behind these amazing artworks</p>
-            </div>
-            
-            <div class="artists-grid" id="artists-grid">
-                <!-- Artists will be loaded dynamically -->
-            </div>
+    <section id="how" class="how">
+      <h3 class="section-title">How it works</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zm0-2a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2" fill="currentColor"/></svg>
+          </div>
+          <h4>Students upload</h4>
+          <p>School-level artists submit their works with title, price, and a short story behind it.</p>
         </div>
+        <div class="step">
+          <div class="step-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-9.5 8.35A8.5 8.5 0 1 1 21 11.5z" fill="currentColor"/></svg>
+          </div>
+          <h4>You discover</h4>
+          <p>Use filters and search to find sketches, digital art, and more — all priced between NPR 200–1500.</p>
+        </div>
+        <div class="step">
+          <div class="step-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 1l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-8.5L2 8h7z" fill="currentColor"/></svg>
+          </div>
+          <h4>Support & own</h4>
+          <p>Buy to support the student and receive a one-of-a-kind piece.</p>
+        </div>
+      </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about-section">
-        <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2 class="section-title">About कला</h2>
-                    <p>
-                        कला is a unique platform dedicated to supporting young, unrecognized art talents. 
-                        We believe that every student with extraordinary artistic skills deserves a platform 
-                        to showcase their creativity and earn from their passion.
-                    </p>
-                    <div class="features-grid">
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-heart"></i>
-                            </div>
-                            <h3>Support Young Artists</h3>
-                            <p>Help school-level students monetize their artistic talents</p>
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-tag"></i>
-                            </div>
-                            <h3>Affordable Prices</h3>
-                            <p>Beautiful artworks starting from just NPR 200</p>
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-palette"></i>
-                            </div>
-                            <h3>Diverse Art Forms</h3>
-                            <p>Sketches, paintings, digital art, and more</p>
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                            <h3>Educational Impact</h3>
-                            <p>Encouraging creativity in education</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="about-image">
-                    <img src="/images/about-illustration.svg" alt="About कला">
-                </div>
-            </div>
+    <section id="submit" class="submit">
+      <h3 class="section-title">Submit Your Art</h3>
+      <form id="submitForm" class="card form">
+        <div class="row">
+          <input name="title" placeholder="Title*" maxlength="150" required />
+          <input name="artist_name" placeholder="Artist Name*" maxlength="120" required />
         </div>
+        <div class="row">
+          <input name="price" type="number" min="0" step="50" placeholder="Price (NPR)*" required />
+          <input name="category" placeholder="Category (e.g., Sketch)" />
+        </div>
+        <input name="image_url" placeholder="Image URL (hosted)" />
+        <textarea name="description" placeholder="Short description (optional)" rows="3"></textarea>
+        <button type="submit" class="primary">Add Artwork</button>
+        <small class="muted">For demo only (no authentication). Avoid sensitive info.</small>
+      </form>
     </section>
+  </main>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Get In Touch</h2>
-                <p class="section-description">Have questions? Want to become an artist? Contact us!</p>
-            </div>
-            
-            <div class="contact-content">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Email</h3>
-                            <p>info@kala.com.np</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Phone</h3>
-                            <p>+977-1-4567890</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Address</h3>
-                            <p>Kathmandu, Nepal</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <form class="contact-form" id="contact-form">
-                    <div class="form-group">
-                        <input type="text" id="name" name="name" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" name="email" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane"></i>
-                        Send Message
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
+  <footer class="site-footer">
+    <p>© <span id="year"></span> कला — made for student artists. Prices range NPR 200–1500.</p>
+  </footer>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>कला</h3>
-                    <p>Empowering young artists, one artwork at a time.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#gallery">Gallery</a></li>
-                        <li><a href="#artists">Artists</a></li>
-                        <li><a href="#about">About</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>For Artists</h4>
-                    <ul>
-                        <li><a href="/upload">Upload Artwork</a></li>
-                        <li><a href="/register">Register as Artist</a></li>
-                        <li><a href="/guidelines">Guidelines</a></li>
-                        <li><a href="/support">Support</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="/faq">FAQ</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/terms">Terms of Service</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 कला. All rights reserved. Made with ❤️ for young artists.</p>
-            </div>
-        </div>
-    </footer>
+  <!-- Modal -->
+  <dialog id="buyDialog">
+    <form method="dialog" id="buyForm" class="dialog-card">
+      <h4>Complete your purchase</h4>
+      <input type="hidden" id="buyArtworkId" />
+      <div class="row">
+        <input id="buyerName" placeholder="Your Name*" required maxlength="120" />
+        <input id="buyerEmail" type="email" placeholder="Your Email*" required maxlength="180" />
+      </div>
+      <button id="confirmBuy" class="primary" value="confirm">Pay (Simulated)</button>
+      <button class="ghost" value="cancel">Cancel</button>
+    </form>
+  </dialog>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="/js/particles-config.js"></script>
-    <script src="/js/animations.js"></script>
-    <script src="/js/main.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/particles.js"></script>
+  <script src="/app.js" defer></script>
 </body>
 </html>
