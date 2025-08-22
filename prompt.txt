@@ -1,0 +1,37 @@
+create a website named कला.
+it is a website where unrecognized art tallents get a platform to express themselves
+various types of sketches, arts and designs are kept for sale for a very very cheap price
+the students who are at school level but have extraordinary art skills will get a platform to show their tallents
+people can buy those arts and support the students.
+the arts will be very cheap. as cheap as NPR 200, NPR 300, NPR 500 or maximum NPR 1500.
+now about the technical part:
+Designs:
+    Modern Aesthetic Look
+    Theme switchable (dark and light)
+    Responsive for all screens
+    particles in background
+    very minimal design 
+    straight to the point
+    use of icons and illustrations
+    user friendly color choices
+    consistent design throught
+    great user experience
+    custom scrollbar
+    hover and focus animations and transitions
+    smooth scrolling
+    smooth browsing
+    minute animations
+    attention to detail
+    give attention to UX (give attention to small small things like text overflowing from container)
+    great minimal Aesthetics
+
+Tech Stack
+    FrontEnd:
+        HTML
+        CSS
+        JS
+        NO FRAMEWORKS
+    Backend:
+        NodeJS(express)
+        mySQL
+
