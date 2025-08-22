@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Dashboard — कला</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .wrap { padding: 20px; max-width: 1100px; margin: 0 auto; }
+    .tools { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { text-align:left; padding:8px; border-bottom:1px solid color-mix(in oklab, var(--text) 6%, transparent); }
+    .small { font-size:13px; color:var(--muted); }
+    .actions { display:flex; gap:8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+      <h2>Admin Dashboard</h2>
+      <div>
+        <a class="chip" href="/admin/add-art.html">+ Add Art</a>
+        <button id="logout" class="chip">Logout</button>
+      </div>
+    </header>
+
+    <section>
+      <h3 class="section-title">Artworks</h3>
+      <div id="artContainer">Loading…</div>
+    </section>
+
+    <section style="margin-top:22px;">
+      <h3 class="section-title">Orders / Buying Requests</h3>
+      <div id="ordersContainer">Loading…</div>
+    </section>
+  </div>
+
+  <script>
+    async function api(path, opts = {}) {
+      opts.credentials = 'include';
+      const res = await fetch('/admin-api' + path, opts);
+      if (!res.ok) throw res;
+      return res.json();
+    }
+
+    function makeArtRow(a) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="width:220px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <img src="${a.image_url || 'https://picsum.photos/seed/' + (a.id||a.title) + '/200/140'}" alt="" style="width:72px;height:54px;object-fit:cover;border-radius:8px"/>
+            <div>
+              <div style="font-weight:700">${a.title}</div>
+              <div class="small">by ${a.artist_name}</div>
+            </div>
+          </div>
+        </td>
+        <td>NPR ${a.price}</td>
+        <td>${a.category || ''}</td>
+        <td>${a.is_sold ? '<span class="badge">Sold</span>' : '<span class="badge">Available</span>'}</td>
+        <td class="small">${(new Date(a.created_at)).toLocaleString()}</td>
+        <td>
+          <div class="actions">
+            <button data-edit="${a.id}" class="chip">Edit</button>
+            <button data-delete="${a.id}" class="chip">Delete</button>
+            <button data-sold="${a.id}" class="chip">${a.is_sold ? 'Mark Unsold' : 'Mark Sold'}</button>
+          </div>
+        </td>
+      `;
+      return tr;
+    }
+
+    async function loadArtworks(){
+      try {
+        const arts = await api('/artworks');
+        const table = document.createElement('table');
+        table.innerHTML = `<thead><tr><th>Artwork</th><th>Price</th><th>Category</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        arts.forEach(a => tbody.appendChild(makeArtRow(a)));
+        table.appendChild(tbody);
+        const container = document.getElementById('artContainer');
+        container.innerHTML = '';
+        container.appendChild(table);
+
+        // attach events
+        container.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-edit');
+          window.location.href = '/admin/edit-art.html?id=' + id;
+        }));
+        container.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+          if (!confirm('Delete this artwork?')) return;
+          const id = btn.getAttribute('data-delete');
+          await api('/artworks/' + id, { method: 'DELETE' });
+          loadArtworks();
+        }));
+        container.querySelectorAll('[data-sold]').forEach(btn => btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-sold');
+          const curRow = btn.closest('tr');
+          const isSold = curRow.querySelector('.badge')?.textContent.includes('Sold');
+          await api('/artworks/' + id + '/mark-sold', {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ sold: !isSold })
+          });
+          loadArtworks();
+        }));
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('artContainer').textContent = 'Failed to load artworks (are you logged in?)';
+      }
+    }
+
+    function makeOrderRow(o) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${o.id}</td>
+        <td>${o.artwork_id} — ${o.artwork_title || ''}</td>
+        <td>${o.buyer_name} <div class="small">${o.buyer_email}</div></td>
+        <td>NPR ${o.amount}</td>
+        <td class="small">${(new Date(o.created_at)).toLocaleString()}</td>
+      `;
+      return tr;
+    }
+
+    async function loadOrders(){
+      try {
+        const orders = await api('/orders');
+        const table = document.createElement('table');
+        table.innerHTML = `<thead><tr><th>#</th><th>Artwork</th><th>Buyer</th><th>Amount</th><th>Date</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        orders.forEach(o => tbody.appendChild(makeOrderRow(o)));
+        table.appendChild(tbody);
+        const container = document.getElementById('ordersContainer');
+        container.innerHTML = '';
+        container.appendChild(table);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('ordersContainer').textContent = 'Failed to load orders (are you logged in?)';
+      }
+    }
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await fetch('/admin-api/logout', { method:'POST', credentials:'include' });
+      window.location.href = '/admin/login.html';
+    });
+
+    // initial
+    loadArtworks();
+    loadOrders();
+  </script>
+</body>
+</html>

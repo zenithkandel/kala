@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Login — कला</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { display:grid; place-items:center; min-height:100vh; background:var(--bg); }
+    .login-card { width: 420px; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); background: var(--card); }
+    .login-card h2 { margin:0 0 12px 0; }
+    .login-card input { width:100%; padding:10px 12px; margin:8px 0; border-radius:8px; border:1px solid color-mix(in oklab, var(--text) 12%, transparent); }
+    .row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <p class="muted">Login with the credentials in your <code>.env</code></p>
+    <form id="loginForm">
+      <input name="username" placeholder="Username" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <div class="row">
+        <button class="primary" type="submit">Sign in</button>
+      </div>
+    </form>
+    <small id="msg" class="muted"></small>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const fd = new FormData(form);
+      const body = { username: fd.get('username'), password: fd.get('password') };
+      const res = await fetch('/admin-api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        window.location.href = '/admin/dashboard.html';
+      } else {
+        const data = await res.json().catch(()=>({error:'Login failed'}));
+        msg.textContent = data.error || 'Login failed';
+      }
+    });
+  </script>
+</body>
+</html>

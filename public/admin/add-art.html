@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Add Artwork — Admin — कला</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .wrap { max-width:800px; margin:24px auto; padding:18px; }
+    .form input, .form textarea { width:100%; padding:10px; border-radius:8px; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="display:flex;justify-content:space-between;align-items:center;">
+      <h2>Add Artwork</h2>
+      <div>
+        <a class="chip" href="/admin/dashboard.html">Back</a>
+      </div>
+    </header>
+
+    <form id="addForm" class="form card" style="padding:16px;margin-top:12px;">
+      <input name="title" placeholder="Title" required />
+      <input name="artist_name" placeholder="Artist name" required />
+      <input name="price" type="number" min="0" step="50" placeholder="Price (NPR)" required />
+      <input name="category" placeholder="Category (Sketch, Digital...)" />
+      <input name="image_url" placeholder="Image URL (hosted) - optional" />
+      <textarea name="description" placeholder="Short description" rows="4"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+        <button class="primary" type="submit">Add</button>
+        <a class="ghost" href="/admin/dashboard.html">Cancel</a>
+      </div>
+      <div id="msg" class="muted" style="margin-top:8px;"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('addForm');
+    const msg = document.getElementById('msg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.price = Number(data.price);
+      try {
+        const res = await fetch('/admin-api/artworks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(()=>({error:'Failed'}));
+          msg.textContent = d.error || 'Failed to add';
+          return;
+        }
+        msg.textContent = 'Added. Redirecting...';
+        setTimeout(()=> window.location.href = '/admin/dashboard.html', 800);
+      } catch (err) {
+        msg.textContent = 'Network error';
+      }
+    });
+  </script>
+</body>
+</html>
