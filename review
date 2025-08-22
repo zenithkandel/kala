@@ -1,0 +1,314 @@
+
+---
+
+# **कला Project – Full Technical Review**
+
+---
+
+## **1️⃣ Project Overview**
+
+“कला” is a platform to allow school-level artists to sell artwork cheaply and gain visibility. The system has:
+
+* **Public Client Side:** Users browse and purchase artworks.
+* **Admin Side:** Password-protected dashboard for managing artworks, orders, and artists.
+* **Tech Stack:**
+
+  * **Frontend:** Vanilla HTML, CSS, JavaScript
+  * **Backend:** Node.js + Express.js
+  * **Database:** MySQL (via XAMPP or standalone)
+  * **Sessions:** `express-session` for admin authentication
+  * **Environment Variables:** `.env` for secrets
+
+---
+
+## **2️⃣ Frontend Analysis**
+
+### **a) Languages**
+
+* **HTML:** Structure of pages. Used for both client and admin interfaces.
+* **CSS:** Styling, including minimal modern aesthetics, theme-switching (light/dark), hover effects, focus effects, smooth scrolling, and small animations.
+* **JavaScript:** Logic for form submission, fetch API calls, DOM updates, and minor animations.
+
+---
+
+### **b) Frontend Architecture**
+
+* `/public/client/` → User-facing site (browse, purchase)
+* `/public/admin/` → Admin dashboard (login, manage artworks, view orders)
+
+---
+
+### **c) Key Frontend Concepts**
+
+1. **Login Form (Admin)**
+
+   * HTML `<form>` element
+   * Input validation via `required` attribute
+   * JS `fetch()` POST to `/admin/login`
+   * Redirects to `dashboard.html` on success
+
+2. **Dashboard**
+
+   * Dynamic tables showing artworks and orders
+   * Buttons for edit/delete/mark-sold
+   * Uses `fetch()` to call `/admin-api/*` endpoints
+   * Handles session cookie via `credentials: 'include'`
+
+3. **Add/Edit Artwork Forms**
+
+   * Fields: title, artist, price, category, image URL, description, sold status
+   * On submit: calls `/admin-api/artworks` POST/PUT
+   * Minimal error handling (shows network/server errors)
+
+4. **User Experience Features**
+
+   * Smooth scrolling and minimal animations
+   * Custom hover and focus styles on buttons and inputs
+   * Responsive layout using flexible CSS (`max-width`, `flex`, `grid`)
+   * Error messages for login and form failures
+   * Fallback images for artworks if URL is missing
+
+---
+
+### **d) Browser Storage**
+
+* **Session Cookie:** Admin login uses HTTP-only cookie (from `express-session`)
+* **LocalStorage / SessionStorage:** Not currently used
+* **Cache:** Browser will cache static assets (images, CSS, JS) by default
+
+---
+
+### **e) Potential Frontend Enhancements**
+
+* Add **image upload support** (currently uses external URLs)
+* Cache artworks in `localStorage` to reduce API calls
+* Add **pagination** or lazy loading for many artworks
+* Add theme switcher using `localStorage` to remember dark/light preference
+
+---
+
+## **3️⃣ Backend Analysis**
+
+### **a) Languages**
+
+* **Node.js** → runtime environment for executing JS on server
+* **Express.js** → web framework for routing, middleware, and HTTP handling
+
+---
+
+### **b) Project Structure**
+
+```
+/server
+   server.js         // main Express server
+   routes/
+      artworks.js    // public artwork APIs
+      admin.js       // admin protected APIs
+   db.js             // MySQL connection pool
+```
+
+* `/public` → serves static frontend
+* `/admin-api` → backend API namespace for admin functions
+* `/api` → backend API namespace for public client
+
+---
+
+### **c) Modules & Packages**
+
+1. **express** → HTTP server, routing, middleware
+2. **dotenv** → Load `.env` for secrets/config
+3. **express-session** → Session handling (stores admin session in memory)
+4. **cors** → Cross-origin resource sharing, allows frontend fetches
+5. **mysql2/promise** → MySQL database driver with async/await support
+
+---
+
+### **d) Routes & Middleware**
+
+#### **Public API**
+
+* `GET /api/artworks` → List available artworks for browsing
+* `POST /api/order` → Place purchase order
+
+#### **Admin API**
+
+* `POST /admin-api/login` → Authenticate admin (check `.env`)
+* `POST /admin-api/logout` → Destroy session
+* `GET /admin-api/artworks` → List all artworks (including sold)
+* `POST /admin-api/artworks` → Add new artwork
+* `PUT /admin-api/artworks/:id` → Edit artwork
+* `DELETE /admin-api/artworks/:id` → Delete artwork
+* `PUT /admin-api/artworks/:id/mark-sold` → Toggle sold status
+* `GET /admin-api/orders` → View all buying requests
+
+#### **Middleware**
+
+* `requireAdmin` → Checks session cookie `isAdmin` before allowing admin actions
+
+---
+
+### **e) Sessions**
+
+* **express-session** stores session in server memory
+* Admin login sets `req.session.isAdmin = true`
+* HTTP-only cookie `kalaa.sid` stores session ID
+* Cookies expire in 8 hours (`maxAge = 8h`)
+
+> ⚠️ Memory store is fine for development. For production, use Redis or database-backed session store.
+
+---
+
+### **f) Security Notes**
+
+* Admin credentials in `.env` → good for single admin
+* Passwords are plaintext in `.env` → acceptable for dev, but hash if storing in DB
+* All admin routes protected by `requireAdmin` middleware
+
+---
+
+### **g) Environment Variables**
+
+* `ADMIN_USER` → admin username
+* `ADMIN_PASS` → admin password
+* `SESSION_SECRET` → session signing key
+* `PORT` → server port
+* `.env` ensures secrets are not committed to git
+
+---
+
+## **4️⃣ Database Analysis**
+
+### **a) Database**
+
+* **MySQL** (can use XAMPP or standalone)
+* Connection via `mysql2/promise` pool in `db.js`
+
+---
+
+### **b) Tables**
+
+#### **artworks**
+
+| Field        | Type                                 | Notes                                 |
+| ------------ | ------------------------------------ | ------------------------------------- |
+| id           | INT AUTO\_INCREMENT PRIMARY KEY      | Unique ID                             |
+| title        | VARCHAR(255)                         | Artwork title                         |
+| artist\_name | VARCHAR(255)                         | Student/artist name                   |
+| price        | INT                                  | Price in NPR (<=1500)                 |
+| category     | VARCHAR(100)                         | Sketch, Digital, etc.                 |
+| image\_url   | VARCHAR(500)                         | Link to image                         |
+| description  | TEXT                                 | Short description                     |
+| is\_sold     | TINYINT(1)                           | Sold status (0 = available, 1 = sold) |
+| created\_at  | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Auto timestamp                        |
+
+#### **orders**
+
+| Field        | Type                                 | Notes                               |
+| ------------ | ------------------------------------ | ----------------------------------- |
+| id           | INT AUTO\_INCREMENT PRIMARY KEY      | Unique order ID                     |
+| artwork\_id  | INT                                  | FK to artworks.id                   |
+| buyer\_name  | VARCHAR(255)                         | Customer name                       |
+| buyer\_email | VARCHAR(255)                         | Customer email                      |
+| amount       | INT                                  | Amount paid (same as artwork price) |
+| created\_at  | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Timestamp                           |
+
+> Relationships: `orders.artwork_id` → `artworks.id`
+
+---
+
+### **c) Database Connection**
+
+```js
+import mysql from 'mysql2/promise';
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'kalaa',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+export default pool;
+```
+
+* Connection pool allows multiple concurrent requests
+* `async/await` ensures non-blocking queries
+
+---
+
+### **d) Notes**
+
+* Price validation is enforced in frontend, not in DB → can add DB constraint (`CHECK(price<=1500)`)
+* No images stored in DB, only URLs → lightweight DB
+
+---
+
+## **5️⃣ Storage & Caching**
+
+### **Frontend**
+
+* **No localStorage or sessionStorage** used currently
+* Browser caches CSS, JS, and images automatically
+
+### **Backend**
+
+* Sessions stored in memory (express-session)
+* Could add Redis or MySQL session store for production
+
+### **API Responses**
+
+* JSON payloads, no caching headers currently
+* Could add `Cache-Control` for public artwork listing
+
+---
+
+## **6️⃣ Models / Data Layer**
+
+* No formal MVC models in code
+* Tables act as models
+* Data access via `pool.query()` directly
+
+---
+
+## **7️⃣ Deployment Environment**
+
+* Tested locally on **Windows + XAMPP**
+* Node.js server runs separately (`npm start`)
+* Apache/XAMPP can serve public assets, but Node handles API requests
+
+---
+
+## **8️⃣ UX & Frontend Micro-Details**
+
+* Buttons have hover transitions
+* Input fields have focus states
+* Tables are scrollable for many entries
+* Error messages shown in small `<div>`
+* Admin redirect after successful login
+* Fallback images for artworks
+* Session prevents unauthorized access to admin pages
+
+---
+
+## **9️⃣ Limitations & Considerations**
+
+* Single admin user in `.env`
+* No image upload → relies on hosted URLs
+* Sessions in memory → not persistent after server restart
+* Price validation is only in frontend (can be bypassed)
+* Orders do not integrate payment gateway (manual confirmation assumed)
+* No CSRF protection or rate limiting
+* No logging or monitoring
+
+---
+
+## ✅ Summary of Everything
+
+| Layer    | Components          | Notes                                        |
+| -------- | ------------------- | -------------------------------------------- |
+| Frontend | HTML, CSS, JS       | Client + Admin SPA                           |
+| Backend  | Node.js, Express.js | API routing, session auth                    |
+| Database | MySQL               | `artworks` + `orders` tables                 |
+| Env      | `.env`              | Admin credentials, session secret, DB config |
+| Session  |                     |                                              |
