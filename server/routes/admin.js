@@ -1,5 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
+import multer from 'multer';
+import path from 'path';
 const router = express.Router();
 
 // Simple requireAdmin middleware (uses session)
@@ -70,7 +72,7 @@ router.post('/artworks', requireAdmin, async (req, res) => {
 router.put('/artworks/:id', requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { title, artist_name, price, category, image_url, description, is_sold } = req.body;
+    const { title, artist_name, price, category, description, is_sold } = req.body;
     await pool.query(
       'UPDATE artworks SET title=?, artist_name=?, price=?, category=?, image_url=?, description=?, is_sold=? WHERE id=?',
       [title, artist_name, price, category || 'Sketch', image_url || '', description || '', is_sold ? 1 : 0, id]
@@ -119,3 +121,54 @@ router.get('/orders', requireAdmin, async (req, res) => {
 });
 
 export default router;
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(process.cwd(), 'public/images/artworks'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+
+// add artwork (with image upload)
+router.post('/artworks', requireAdmin, upload.single('image'), async (req, res) => {
+  try {
+    const { title, artist_name, price, category, description } = req.body;
+    if (!title || !artist_name || typeof price === 'undefined') return res.status(400).json({ error: 'Missing fields' });
+    let image_url = req.body.image_url || '';
+    if (req.file) {
+      image_url = '/images/artworks/' + req.file.filename;
+    }
+    const [result] = await pool.query(
+      'INSERT INTO artworks (title, artist_name, price, category, image_url, description) VALUES (?,?,?,?,?,?)',
+      [title, artist_name, price, category || 'Sketch', image_url, description || '']
+    );
+    res.json({ success: true, id: result.insertId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add artwork' });
+  }
+});
+
+// update artwork (with image upload)
+router.put('/artworks/:id', requireAdmin, upload.single('image'), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, artist_name, price, category, description, is_sold } = req.body;
+    let image_url = req.body.image_url || '';
+    if (req.file) {
+      image_url = '/images/artworks/' + req.file.filename;
+    }
+    await pool.query(
+      'UPDATE artworks SET title=?, artist_name=?, price=?, category=?, image_url=?, description=?, is_sold=? WHERE id=?',
+      [title, artist_name, price, category || 'Sketch', image_url, description || '', is_sold ? 1 : 0, id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update artwork' });
+  }
+});

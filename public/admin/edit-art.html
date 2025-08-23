@@ -19,12 +19,13 @@
       </div>
     </header>
 
-    <form id="editForm" class="form card" style="padding:16px;margin-top:12px;">
+    <form id="editForm" class="form card" style="padding:16px;margin-top:12px;" enctype="multipart/form-data">
       <input name="title" placeholder="Title" required />
       <input name="artist_name" placeholder="Artist name" required />
       <input name="price" type="number" min="0" step="50" placeholder="Price (NPR)" required />
       <input name="category" placeholder="Category (Sketch, Digital...)" />
       <input name="image_url" placeholder="Image URL (hosted) - optional" />
+      <input type="file" name="image" accept="image/*" />
       <textarea name="description" placeholder="Short description" rows="4"></textarea>
       <label style="display:flex;gap:8px;align-items:center;margin-top:6px;">
         <input type="checkbox" name="is_sold" /> Mark as sold
@@ -71,15 +72,14 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msg.textContent = '';
-      const data = Object.fromEntries(new FormData(form).entries());
-      data.price = Number(data.price);
-      data.is_sold = form.is_sold.checked;
+      const formData = new FormData(form);
+      formData.set('price', Number(form.price.value));
+      formData.set('is_sold', form.is_sold.checked);
       try {
         const res = await fetch('/admin-api/artworks/' + id, {
           method: 'PUT',
-          headers: {'Content-Type':'application/json'},
           credentials: 'include',
-          body: JSON.stringify(data)
+          body: formData
         });
         if (!res.ok) {
           const d = await res.json().catch(()=>({error:'Failed'}));
