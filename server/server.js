@@ -4,13 +4,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 import session from 'express-session';
+import csrf from 'csurf';
+import rateLimit from 'express-rate-limit';
 import artworksRouter from './routes/artworks.js';
 import adminRouter from './routes/admin.js';
 
 dotenv.config();
 const app = express();
 
-app.use(cors()); // same-origin static + APIs; it's fine for local
+app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,24 +24,30 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // secure: true, // disable for local; enable with HTTPS in production
-    maxAge: 1000 * 60 * 60 * 8, // 8 hours
+    // secure: true, // enable with HTTPS in production
+    maxAge: 1000 * 60 * 60 * 8,
   }
 }));
+
+// CSRF protection
+const csrfProtection = csrf();
+app.use(csrfProtection);
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests, please try again later.'
+});
+app.use(limiter);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Static assets (client + admin)
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// API routes (public)
 app.use('/api/artworks', artworksRouter);
-
-// Admin routes (protected by middleware inside adminRouter)
 app.use('/admin-api', adminRouter);
 
-// Fallback (serve SPA / index)
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
